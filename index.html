@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Member Registry</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#6D3BEA"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F1FF; --card:#fff; --ink:#12201D; --muted:#5E6D69; --line:#D6DEDC;
+  --pine:#6D3BEA; --pine-d:#5A2BD0; --tint:#F0E8FF; --err:#B42318; --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(135deg,#FFE3D3 0%,#F1E4FF 45%,#CFF3EE 100%) fixed;color:var(--ink);
+  min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px}
+.brand{font-weight:800;letter-spacing:-.02em;font-size:17px}
+.brand small{display:block;font-weight:500;color:var(--muted);font-size:12px;letter-spacing:0}
+.who{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+.link{background:none;border:0;color:var(--pine);font:inherit;font-weight:600;cursor:pointer;padding:6px 8px;border-radius:8px}
+.link:hover{background:var(--tint)}
+main{flex:1;display:flex;justify-content:center;padding:8px 16px 48px}
+.card{width:100%;max-width:560px;background:var(--card);border-radius:22px;padding:36px 36px 30px;
+  box-shadow:0 1px 2px rgba(18,32,29,.06),0 18px 40px -18px rgba(18,32,29,.25);align-self:flex-start}
+.wide{max-width:860px}
+h1{font-size:30px;line-height:1.15;letter-spacing:-.03em;margin:0 0 8px;font-weight:800}
+p.sub{margin:0 0 26px;color:var(--muted);font-size:15px;line-height:1.5}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;width:max-content;margin:0 auto 18px}
+.tabs button{border:0;background:none;font:inherit;font-weight:600;font-size:14px;padding:8px 18px;border-radius:9px;color:var(--muted);cursor:pointer}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.bar{display:flex;gap:6px;margin-bottom:28px}
+.bar i{flex:1;height:4px;border-radius:4px;background:var(--line);transition:background .3s}
+.bar i.on{background:#6D3BEA}.bar i:nth-child(2).on{background:#E8479B}.bar i:nth-child(3).on{background:#F59E0B}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
+label span{font-weight:400;color:var(--muted)}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:14px 15px;border:1.5px solid var(--line);border-radius:12px;
+  background:#fff;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+textarea{resize:vertical;min-height:84px}
+input:focus,select:focus,textarea:focus{border-color:var(--pine);box-shadow:0 0 0 4px rgba(109,59,234,.18)}
+.bad input,.bad select{border-color:var(--err)}
+.msg{color:var(--err);font-size:12.5px;margin-top:6px;min-height:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{flex:1;min-width:84px;font:inherit;font-weight:600;font-size:15px;padding:13px 12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:all .15s}
+.chips button:hover{border-color:var(--pine)}
+.chips button.on{background:linear-gradient(135deg,#6D3BEA,#E8479B);border-color:transparent;color:#fff}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg button{text-align:left;padding:16px;border-radius:14px;border:1.5px solid var(--line);background:#fff;font:inherit;cursor:pointer;transition:all .15s}
+.seg button b{display:block;font-size:15px;margin-bottom:3px}
+.seg button small{color:var(--muted);font-size:12.5px}
+.seg button.on{border-color:var(--pine);background:var(--tint);box-shadow:0 0 0 3px rgba(109,59,234,.14)}
+.actions{display:flex;justify-content:space-between;align-items:center;margin-top:30px;gap:12px}
+.btn{font:inherit;font-weight:700;font-size:16px;border:0;border-radius:12px;padding:15px 26px;cursor:pointer;background:linear-gradient(135deg,#6D3BEA,#E8479B);color:#fff;transition:background .15s,transform .05s}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.98)} .btn:disabled{opacity:.6;cursor:wait}
+.btn.ghost{background:none;color:var(--muted);padding-left:8px;padding-right:8px}
+.btn.ghost:hover{color:var(--ink);background:none}
+.btn.block{width:100%}
+.card{position:relative;overflow:hidden}.card::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,#6D3BEA,#E8479B,#F59E0B,#14B8A6)}.brand::before{content:"";display:inline-block;width:14px;height:14px;border-radius:5px;margin-right:8px;background:linear-gradient(135deg,#6D3BEA,#F59E0B)}.step{animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.done{text-align:center;padding:10px 0}
+.tick{width:72px;height:72px;border-radius:50%;background:var(--tint);margin:0 auto 20px;display:grid;place-items:center}
+.tick svg{width:34px;height:34px;stroke:var(--pine);stroke-width:3;fill:none;stroke-dasharray:40;stroke-dashoffset:40;animation:draw .5s .1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.idtag{display:inline-block;margin:6px 0 24px;padding:6px 14px;background:var(--bg);border-radius:99px;font-weight:700;font-size:14px}
+.warn{background:#FFF6E5;border:1px solid #F2D9A0;border-radius:12px;padding:14px 16px;font-size:14px;margin-bottom:18px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12.5px;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:13px 10px;border-bottom:1px solid var(--bg)}
+td.n{font-weight:600}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--tint);color:var(--pine);font-size:12px;font-weight:600}
+.pill.new{background:#FFF1D6;color:#8A5A00}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+.scroll{overflow-x:auto}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+:focus-visible{outline:3px solid rgba(109,59,234,.5);outline-offset:2px}
+@media(max-width:560px){.card{padding:26px 20px}.grid{grid-template-columns:1fr}h1{font-size:26px}.seg{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand" id="brand">Grace Community Church<small>Member registry</small></div>
+  <button class="link" id="install" hidden>Install app</button><div class="who" id="who" hidden><span id="roleLabel"></span><button class="link" id="lock">Lock</button></div>
+</header>
+<main><div class="card" id="card"></div></main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Edit these for your church ===== */
+const CHURCH = 'Grace Community Church';
+const MINISTRIES = ['Choir', 'Ushering', 'Youth', 'Children', 'Women', 'Men', 'Media', 'Prayer', 'Welfare', 'None yet'];
+/* ====================================== */
+
+const $ = s => document.querySelector(s);
+const card = $('#card');
+let code = '', role = '', step = 0, data = {}, tab = 'add';
+
+const API_URL = ''; // Paste your Apps Script Web app URL here. Leave empty for demo mode.
+async function run(fn, ...a) {
+  if (API_URL) {
+    const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn, args: a }) });
+    const j = await r.json(); if (j.error) throw new Error(j.error); return j.result;
+  }
+  await new Promise(r => setTimeout(r, 350)); // demo mode: data stays in this browser only
+  const role = a[0] === 'admin' ? 'admin' : a[0] === 'welcome' ? 'entry' : null;
+  if (!role) throw new Error('That access code is not correct.');
+  if (fn === 'login') return { role };
+  let db = []; try { db = JSON.parse(localStorage.getItem('demo') || '[]'); } catch (e) {}
+  if (fn === 'addMember') {
+    const d = a[1], dg = s => String(s).replace(/\D/g, '');
+    const dup = db.find(m => dg(m.phone) === dg(d.phone));
+    if (dup && !d.confirmDuplicate) return { duplicate: true, name: dup.name, id: dup.id };
+    const id = 'M-' + String(db.length + 1).padStart(4, '0'), name = d.firstName + ' ' + d.lastName;
+    db.push({ id, name, phone: d.phone, ministry: d.ministry || '', joined: d.dateJoined, followUp: d.memberType === 'New member' ? 'Needs follow-up' : '' });
+    try { localStorage.setItem('demo', JSON.stringify(db)); } catch (e) {}
+    return { ok: true, id, name };
+  }
+  if (fn === 'listMembers') {
+    if (role !== 'admin') throw new Error('This needs the admin code.');
+    const q = String(a[1] || '').toLowerCase();
+    return { total: db.length, rows: db.slice().reverse().filter(m => !q || JSON.stringify(m).toLowerCase().includes(q)) };
+  }
+}
+const toast = t => { const el = $('#toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('#brand').firstChild.textContent = CHURCH; document.title = CHURCH + ' registry';
+
+/* ---------- Access ---------- */
+function showLogin() {
+  code = ''; role = ''; $('#who').hidden = true; card.classList.remove('wide');
+  card.innerHTML = `
+    <h1>Welcome</h1>
+    <p class="sub">Enter the access code you were given to continue.</p>
+    <label for="code">Access code</label>
+    <input id="code" type="password" autocomplete="off" autofocus placeholder="••••••••">
+    <div class="msg" id="err"></div>
+    <div class="actions"><span></span><button class="btn" id="go">Continue</button></div>`;
+  const submit = async () => {
+    const b = $('#go'); b.disabled = true; $('#err').textContent = '';
+    try { const r = await run('login', $('#code').value); code = $('#code').value; role = r.role; start(); }
+    catch (e) { $('#err').textContent = e.message; b.disabled = false; }
+  };
+  $('#go').onclick = submit;
+  $('#code').onkeydown = e => e.key === 'Enter' && submit();
+}
+$('#lock').onclick = showLogin;
+
+function start() {
+  $('#who').hidden = false;
+  $('#roleLabel').textContent = role === 'admin' ? 'Admin' : 'Data entry';
+  tab = 'add'; newForm();
+}
+
+/* ---------- Shell with tabs (admin only) ---------- */
+function shell(inner, wide) {
+  card.classList.toggle('wide', !!wide);
+  const tabs = role === 'admin' ? `<div class="tabs"><button data-t="add" class="${tab==='add'?'on':''}">Add member</button><button data-t="list" class="${tab==='list'?'on':''}">Members</button></div>` : '';
+  card.innerHTML = tabs + inner;
+  card.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { tab = b.dataset.t; tab === 'add' ? newForm() : showList(); });
+}
+
+/* ---------- Add member: 3 steps ---------- */
+function newForm() {
+  step = 0;
+  data = { gender: '', memberType: 'New member', baptized: '', dateJoined: new Date().toISOString().slice(0, 10) };
+  render();
+}
+
+function chips(name, opts) {
+  return `<div class="chips" data-chip="${name}">${opts.map(o => `<button type="button" class="${data[name]===o?'on':''}">${o}</button>`).join('')}</div>`;
+}
+const field = (id, label, type = 'text', extra = '', opt = false) =>
+  `<div><label for="${id}">${label}${opt ? ' <span>optional</span>' : ''}</label><input id="${id}" type="${type}" value="${esc(data[id])}" ${extra}><div class="msg"></div></div>`;
+
+function render() {
+  const bar = `<div class="bar">${[0,1,2].map(i => `<i class="${i<=step?'on':''}"></i>`).join('')}</div>`;
+  let body = '';
+  if (step === 0) body = `
+    <h1>Who are we adding?</h1><p class="sub">Start with the basics. It takes about a minute.</p>
+    <div class="grid">
+      ${field('firstName', 'First name', 'text', 'autocomplete="off" autofocus')}
+      ${field('lastName', 'Last name', 'text', 'autocomplete="off"')}
+      <div class="full"><label>Gender</label>${chips('gender', ['Female', 'Male'])}<div class="msg" data-m="gender"></div></div>
+      <div class="full">${field('dob', 'Date of birth', 'date', '', true)}</div>
+    </div>`;
+  if (step === 1) body = `
+    <h1>How can we reach them?</h1><p class="sub">A phone number helps the church follow up with care.</p>
+    <div class="grid">
+      <div class="full">${field('phone', 'Phone number', 'tel', 'inputmode="tel" placeholder="+256 7XX XXX XXX"')}</div>
+      <div class="full">${field('email', 'Email', 'email', 'inputmode="email"', true)}</div>
+      <div class="full">${field('address', 'Home area or address', 'text', '', true)}</div>
+      ${field('occupation', 'Occupation', 'text', '', true)}
+      <div><label for="marital">Marital status <span>optional</span></label>
+        <select id="marital">${['', 'Single', 'Married', 'Widowed', 'Divorced'].map(o => `<option ${data.marital===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    </div>`;
+  if (step === 2) body = `
+    <h1>Life in the church</h1><p class="sub">Tell us where they belong.</p>
+    <div class="grid">
+      <div class="full"><label>Membership</label><div class="seg" id="seg">
+        <button type="button" data-v="New member" class="${data.memberType==='New member'?'on':''}"><b>New member</b><small>Just joined. We'll flag for follow-up.</small></button>
+        <button type="button" data-v="Existing member" class="${data.memberType==='Existing member'?'on':''}"><b>Existing member</b><small>Already part of the church.</small></button></div></div>
+      ${field('dateJoined', 'Date joined', 'date')}
+      <div><label>Baptized?</label>${chips('baptized', ['Yes', 'No'])}</div>
+      <div><label for="ministry">Ministry <span>optional</span></label>
+        <select id="ministry"><option value=""></option>${MINISTRIES.map(o => `<option ${data.ministry===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      ${field('group', 'Fellowship group', 'text', '', true)}
+      <div class="full">${field('invitedBy', 'Invited by', 'text', '', true)}</div>
+      <div class="full"><label for="notes">Notes <span>optional</span></label><textarea id="notes">${esc(data.notes)}</textarea></div>
+    </div>`;
+
+  shell(`${bar}<div class="step">${body}
+    <div class="actions">
+      ${step ? '<button class="btn ghost" id="back">Back</button>' : '<span></span>'}
+      <button class="btn" id="next">${step === 2 ? 'Save member' : 'Continue'}</button>
+    </div></div>`);
+
+  card.querySelectorAll('[data-chip]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => {
+    data[g.dataset.chip] = b.textContent; g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  const seg = $('#seg'); if (seg) seg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    data.memberType = b.dataset.v; seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  });
+  if ($('#back')) $('#back').onclick = () => { grab(); step--; render(); };
+  $('#next').onclick = next;
+  card.querySelectorAll('input').forEach(i => i.onkeydown = e => e.key === 'Enter' && next());
+  const first = card.querySelector('input,select'); if (first && step < 2) first.focus();
+}
+
+function grab() { card.querySelectorAll('input,select,textarea').forEach(el => { if (el.id) data[el.id] = el.value.trim(); }); }
+function flag(id, m) { const el = $('#' + id); if (!el) return; const w = el.parentElement; w.classList.add('bad'); w.querySelector('.msg').textContent = m; el.focus(); }
+
+function validate() {
+  card.querySelectorAll('.bad').forEach(w => { w.classList.remove('bad'); w.querySelector('.msg').textContent = ''; });
+  if (step === 0) {
+    if (!data.firstName) return flag('firstName', 'Enter a first name.'), false;
+    if (!data.lastName) return flag('lastName', 'Enter a last name.'), false;
+    if (!data.gender) { card.querySelector('[data-m=gender]').textContent = 'Choose one.'; return false; }
+  }
+  if (step === 1) {
+    if (String(data.phone).replace(/\D/g, '').length < 7) return flag('phone', 'Enter a valid phone number.'), false;
+    if (data.email && !/^\S+@\S+\.\S+$/.test(data.email)) return flag('email', 'That email looks incomplete.'), false;
+  }
+  return true;
+}
+
+async function next() {
+  grab(); if (!validate()) return;
+  if (step < 2) { step++; render(); return; }
+  save(false);
+}
+
+async function save(confirmDuplicate) {
+  const b = $('#next'); if (b) { b.disabled = true; b.textContent = 'Saving…'; }
+  try {
+    const r = await run('addMember', code, { ...data, confirmDuplicate });
+    if (r.duplicate) {
+      shell(`<h1>Possible duplicate</h1>
+        <div class="warn"><b>${esc(r.name)}</b> (${esc(r.id)}) is already registered with this phone number.</div>
+        <div class="actions"><button class="btn ghost" id="cancel">Go back</button><button class="btn" id="force">Save anyway</button></div>`);
+      $('#cancel').onclick = () => { step = 1; render(); };
+      $('#force').onclick = () => save(true);
+      return;
+    }
+    shell(`<div class="done"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h1>${esc(r.name)} is registered</h1><div class="idtag">${esc(r.id)}</div>
+      <button class="btn block" id="again">Add another member</button></div>`);
+    $('#again').onclick = newForm; $('#again').focus();
+  } catch (e) {
+    toast(e.message); if (b) { b.disabled = false; b.textContent = 'Save member'; }
+  }
+}
+
+/* ---------- Members list (admin) ---------- */
+function showList() {
+  shell(`<h1>Members</h1><p class="sub" id="count">Loading…</p>
+    <input id="q" type="search" placeholder="Search by name, phone, ministry or group" autocomplete="off">
+    <div class="scroll" style="margin-top:18px" id="rows"></div>`, true);
+  let t; $('#q').oninput = () => { clearTimeout(t); t = setTimeout(load, 250); };
+  load();
+}
+async function load() {
+  try {
+    const r = await run('listMembers', code, $('#q').value);
+    $('#count').textContent = `${r.total} registered${r.rows.length < r.total ? ` · showing ${r.rows.length}` : ''}`;
+    $('#rows').innerHTML = r.rows.length ? `<table><thead><tr><th>Name</th><th>Phone</th><th>Ministry</th><th>Joined</th><th></th></tr></thead><tbody>${
+      r.rows.map(m => `<tr><td class="n">${esc(m.name)}<br><small style="color:var(--muted);font-weight:400">${esc(m.id)}</small></td><td>${esc(m.phone)}</td><td>${esc(m.ministry)}</td><td>${esc(m.joined)}</td>
+      <td>${m.followUp ? `<span class="pill new">${esc(m.followUp)}</span>` : '<span class="pill">Active</span>'}</td></tr>`).join('')}</tbody></table>`
+      : '<div class="empty">No members match that search.</div>';
+  } catch (e) { toast(e.message); }
+}
+
+if (!API_URL) $('#brand small').textContent = 'Demo mode: try codes welcome or admin';
+let ip; addEventListener('beforeinstallprompt', e => { e.preventDefault(); ip = e; });
+if (!matchMedia('(display-mode: standalone)').matches) $('#install').hidden = false;
+$('#install').onclick = async () => { if (ip) { ip.prompt(); ip = null; } else toast('iPhone: tap Share, then Add to Home Screen. Desktop: use the install icon in the address bar.'); };
+try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
+showLogin();
+</script>
+</body>
+</html>
