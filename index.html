@@ -153,7 +153,7 @@ function showLogin() {
     catch (e) { $('#err').textContent = e.message; b.disabled = false; }
   };
   $('#go').onclick = submit;
-  $('#code').onkeydown = e => e.key === 'Enter' && submit();
+  $('#code').onkeydown = e => { if (e.key === 'Enter') submit(); };
 }
 $('#lock').onclick = showLogin;
 
@@ -234,7 +234,7 @@ function render() {
   });
   if ($('#back')) $('#back').onclick = () => { grab(); step--; render(); };
   $('#next').onclick = next;
-  card.querySelectorAll('input').forEach(i => i.onkeydown = e => e.key === 'Enter' && next());
+  card.querySelectorAll('input').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') next(); });
   const first = card.querySelector('input,select'); if (first && step < 2) first.focus();
 }
 
