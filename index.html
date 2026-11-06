@@ -4,7 +4,7 @@
 <base target="_top">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>RCCG - Temple of God</title>
+<title>RCCG Temple of God</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -108,6 +108,22 @@ td{padding:13px 10px;border-bottom:1px solid var(--line)}td.n{font-weight:600}
 .empty{text-align:center;color:var(--muted);padding:40px 0}.scroll{overflow-x:auto}
 .chip{border:0;font:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;background:rgba(245,158,11,.18);color:#B45309;cursor:pointer}.chip.off{background:rgba(208,52,44,.14);color:var(--red)}
 .qrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.qrow small{color:var(--muted)}.qb{display:flex;gap:2px;flex-shrink:0}
+.lhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.btn.sm{padding:10px 18px;font-size:15px;border-radius:12px;white-space:nowrap}
+#report{display:none}
+@media print{
+  @page{size:A4 landscape;margin:12mm 12mm 16mm}
+  body>*:not(#report){display:none!important}
+  body{background:#fff!important;display:block;padding:0;min-height:0}body::before{display:none}
+  #report{display:block;color:#1D1D1F;font-size:10.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .rp-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid #27196F;padding-bottom:10px}.rp-head img{width:58px;height:58px}
+  .rp-head h2{margin:0;font-size:20px;color:#27196F;letter-spacing:-.01em}.rp-head p{margin:3px 0 0;color:#6E6E73;font-size:11px}
+  .rp-sum{display:flex;gap:10px;margin:12px 0 14px}.rp-sum div{flex:1;border:1px solid #E5E5EA;border-radius:8px;padding:8px 12px;font-size:10px;color:#6E6E73;text-transform:uppercase;letter-spacing:.06em}
+  .rp-sum b{display:block;font-size:20px;color:#27196F;letter-spacing:0;text-transform:none}
+  #report table{width:100%;border-collapse:collapse;font-size:10px}#report thead{display:table-header-group}
+  #report th{background:#27196F;color:#fff;text-align:left;padding:7px 8px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;border:0}
+  #report td{padding:6px 8px;border-bottom:1px solid #E5E5EA;color:#1D1D1F}#report tr{break-inside:avoid}#report tbody tr:nth-child(even) td{background:#F5F5FA}
+  .rp-foot{position:fixed;bottom:-10mm;left:0;right:0;text-align:center;font-size:9px;color:#8E8E93}
+}
 .toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:14px;font-size:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}
 :focus-visible{outline:3px solid rgba(59,42,148,.55);outline-offset:2px}
 @media(max-width:560px){.card{padding:26px 20px}.grid{grid-template-columns:1fr}.seg{grid-template-columns:1fr}.org{font-size:38px}#roleLabel{display:none}.stat b{font-size:26px}}
@@ -122,6 +138,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--line)}td.n{font-weight:600}
 <div id="config" hidden data-church="RCCG" data-sub="Temple of God" data-api="https://script.google.com/macros/s/AKfycbxGAvO2_QgdjIkHIsCzbG8uWIypFCLXfISSVxRx6sthEQBNcHvwyEsSkhzwOFKHmJ6eGQ/exec" data-ministries="Choir, Ushering, Youth, Children, Women, Men, Media, Prayer, Welfare, None yet"></div>
 <main><div class="card" id="card"><h1>Loading…</h1><p class="sub">If this message stays, open the app from its website link in Chrome, Safari or Edge. A file preview or a downloaded copy cannot run the app.</p></div></main>
 <nav id="nav" hidden></nav>
+<div id="report"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -154,7 +171,7 @@ async function run(fn, ...a) {
     const dup = db.find(m => dg(m.phone) === dg(d.phone));
     if (dup && !d.confirmDuplicate) return { duplicate: true, name: dup.name, id: dup.id };
     const id = 'M-' + String(db.length + 1).padStart(4, '0'), name = d.firstName + ' ' + d.lastName;
-    db.push({ id, name, phone: d.phone, ministry: d.ministry || '', joined: d.dateJoined, dob: d.dob || '', followUp: d.memberType === 'New member' ? 'Needs follow-up' : '' });
+    db.push({ id, name, phone: d.phone, ministry: d.ministry || '', joined: d.dateJoined, dob: d.dob || '', gender: d.gender || '', email: d.email || '', address: d.address || '', marital: d.marital || '', occupation: d.occupation || '', type: d.memberType, baptized: d.baptized || '', group: d.group || '', invitedBy: d.invitedBy || '', notes: d.notes || '', added: new Date().toISOString().slice(0, 16).replace('T', ' '), followUp: d.memberType === 'New member' ? 'Needs follow-up' : '' });
     try { localStorage.setItem('demo', JSON.stringify(db)); } catch (e) {}
     return { ok: true, id, name };
   }
@@ -164,6 +181,11 @@ async function run(fn, ...a) {
     const bd = db.filter(x => x.dob).map(x => { const d = new Date(x.dob); return { name: x.name, diff: Math.round((new Date(t.getFullYear(), d.getMonth(), d.getDate()) - t0) / 864e5) }; })
       .filter(x => x.diff >= 0 && x.diff <= 7).map(x => ({ name: x.name, when: x.diff ? 'in ' + x.diff + ' days' : 'Today' }));
     return { total: db.length, month: db.filter(x => (x.joined || '').startsWith(ym)).length, followUp: db.filter(x => x.followUp).length, birthdays: bd };
+  }
+  if (fn === 'exportMembers') {
+    if (role !== 'admin') throw new Error('This needs the admin code.');
+    const H = ['Member ID', 'Date Added', 'First Name', 'Last Name', 'Gender', 'Date of Birth', 'Phone', 'Email', 'Address', 'Marital Status', 'Occupation', 'Member Type', 'Date Joined', 'Baptized', 'Ministry', 'Fellowship Group', 'Invited By', 'Follow-up Status', 'Status', 'Notes'];
+    return { headers: H, rows: db.map(m => { const p = m.name.split(' '); return [m.id, m.added || m.joined || '', p[0], p.slice(1).join(' '), m.gender || '', m.dob || '', m.phone, m.email || '', m.address || '', m.marital || '', m.occupation || '', m.type || (m.followUp ? 'New member' : 'Existing member'), m.joined || '', m.baptized || '', m.ministry || '', m.group || '', m.invitedBy || '', m.followUp || '', 'Active', m.notes || '']; }) };
   }
   if (fn === 'listMembers') {
     if (role !== 'admin') throw new Error('This needs the admin code.');
@@ -190,7 +212,7 @@ function showLogin() {
       ${API_URL ? '' : '<p class="demo">Demo mode. Use <b>welcome</b> or <b>admin</b>.</p>'}
     </div>
     <button class="link install">Install this app</button>
-    <p class="verse">“Jesus Christ the same yesterday, today, and for ever”<b>HEBREWS 13:8</b></p>`;
+    <p class="verse">“For where two or three are gathered together in my name, there am I in the midst of them.”<b>MATTHEW 18:20</b></p>`;
   const submit = async () => {
     const b = $('#go'); b.disabled = true; $('#err').textContent = '';
     const typed = $('#code').value;
@@ -226,6 +248,7 @@ function shell(inner, wide) {
 const ICON = {
   home: '<svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M5.5 9.8V20h13V9.8"/></svg>',
   plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  down: '<svg viewBox="0 0 24 24"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 19.5h14"/></svg>',
   users: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14.4c2.3 0 3.6 1.3 4 4"/></svg>',
   cloud: '<svg viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 10a4.2 4.2 0 0 1-.5 8.5H7zM12 16.5v-5m-2.5 2.5 2.5-2.5 2.5 2.5"/></svg>'
 };
@@ -235,7 +258,7 @@ function updateNav() {
   n.innerHTML = items.map(([k, l, i]) => `<button data-t="${k}" class="${tab === k ? 'on' : ''}">${i}<span>${l}</span></button>`).join('');
   n.querySelectorAll('button').forEach(b => b.onclick = () => go(b.dataset.t));
 }
-function go(t) { tab = t; ({ home, add: newForm, list: showList, sync: showPending })[t](); }
+function go(t) { tab = t; ({ home, add: newForm, list: showList, sync: showPending, export: exportScreen })[t](); }
 
 function home() {
   tab = 'home'; card.className = 'card hub'; updateNav(); updateChip();
@@ -245,13 +268,14 @@ function home() {
     <button class="hero-tile" id="tAdd"><div><b>Register a member</b><span>Add someone new to the family in about a minute</span></div><i>${ICON.plus}</i></button>
     <div class="stats" id="stats" hidden></div>
     <div class="tiles">
-      ${role === 'admin' ? `<button class="tile" id="tList"><i class="ic navy">${ICON.users}</i><b>Members</b><span>Search the registry</span></button>` : ''}
+      ${role === 'admin' ? `<button class="tile" id="tList"><i class="ic navy">${ICON.users}</i><b>Members</b><span>Search the registry</span></button><button class="tile" id="tExp"><i class="ic navy">${ICON.down}</i><b>Download</b><span>Excel, PDF or CSV</span></button>` : ''}
       <button class="tile" id="tSync"><i class="ic ${n ? 'red' : 'green'}">${ICON.cloud}</i><b>${n ? n + ' waiting' : 'All synced'}</b><span>${on ? (n ? 'Tap to review and upload' : 'Everything is saved') : 'Offline. Saving on this phone'}</span></button>
     </div>
     <div id="bdays"></div>
     <button class="link install">Install this app on your phone</button>`;
   $('#tAdd').onclick = () => go('add'); $('#tSync').onclick = () => go('sync');
   if ($('#tList')) $('#tList').onclick = () => go('list');
+  if ($('#tExp')) $('#tExp').onclick = () => go('export');
   if (role === 'admin') loadStats();
 }
 async function loadStats() {
@@ -432,12 +456,141 @@ function showPending() {
   $('#now').onclick = () => { syncBlocked = false; sync().then(showPending); };
 }
 
+/* ---------- Export: Excel, PDF directory, CSV (admin) ---------- */
+const xo = { scope: 'All members', fmt: 'xlsx' };
+const FMT = { xlsx: ['Excel workbook', 'Formatted spreadsheet with a summary sheet'], pdf: ['PDF directory', 'Print-ready member list with the church logo'], csv: ['CSV file', 'Plain data for any other system'] };
+const longDate = () => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+function exportScreen() {
+  tab = 'list';
+  shell(`<h1>Download members</h1><p class="sub">Choose who to include and the kind of file you want.</p>
+    <label>Include</label>
+    <div class="chips" id="xScope">${['All members', 'New members', 'Need follow-up'].map(o => `<button type="button" class="${xo.scope === o ? 'on' : ''}">${o}</button>`).join('')}</div>
+    <label style="margin-top:24px">Format</label>
+    <div class="seg" id="xFmt" style="grid-template-columns:1fr">${Object.entries(FMT).map(([k, v]) => `<button type="button" data-v="${k}" class="${xo.fmt === k ? 'on' : ''}"><b>${v[0]}</b><small>${v[1]}</small></button>`).join('')}</div>
+    <div class="actions"><button class="btn ghost" id="xBack">Back</button><button class="btn" id="xGo">Prepare download</button></div>`);
+  $('#xScope').querySelectorAll('button').forEach(b => b.onclick = () => { xo.scope = b.textContent; $('#xScope').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+  $('#xFmt').querySelectorAll('button').forEach(b => b.onclick = () => { xo.fmt = b.dataset.v; $('#xFmt').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+  $('#xBack').onclick = () => go('list'); $('#xGo').onclick = prepareExport;
+}
+
+async function prepareExport() {
+  const b = $('#xGo'); b.disabled = true; b.textContent = 'Preparing…';
+  try {
+    const r = await run('exportMembers', code), ix = Object.fromEntries(r.headers.map((h, i) => [h, i]));
+    let rows = r.rows;
+    if (xo.scope === 'New members') rows = rows.filter(x => x[ix['Member Type']] === 'New member');
+    if (xo.scope === 'Need follow-up') rows = rows.filter(x => x[ix['Follow-up Status']] === 'Needs follow-up');
+    rows = rows.slice().sort((a, c) => (a[ix['Last Name']] + ' ' + a[ix['First Name']]).localeCompare(c[ix['Last Name']] + ' ' + c[ix['First Name']]));
+    readyScreen(r.headers, ix, rows);
+  } catch (e) {
+    toast(e.offline ? 'You are offline. Connect to download the member list.' : e.message);
+    b.disabled = false; b.textContent = 'Prepare download';
+  }
+}
+
+function readyScreen(H, ix, rows) {
+  const stamp = new Date().toISOString().slice(0, 10);
+  shell(`<div class="done"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h1>Your file is ready</h1><p class="sub">${rows.length} ${rows.length === 1 ? 'member' : 'members'} · ${esc(xo.scope)} · ${FMT[xo.fmt][0]}</p>
+    <button class="btn block" id="save">${xo.fmt === 'pdf' ? 'Open print view' : 'Save to this device'}</button>
+    <button class="btn ghost" id="xAgain" style="margin-top:8px">Choose something else</button></div>`);
+  $('#xAgain').onclick = exportScreen;
+  $('#save').onclick = () => {
+    if (xo.fmt === 'pdf') return printReport(ix, rows, stamp);
+    saveBlob(xo.fmt === 'xlsx' ? buildXlsx(H, ix, rows) : buildCsv(H, rows), 'RCCG-Members-' + stamp + '.' + xo.fmt);
+  };
+}
+
+async function saveBlob(blob, name) {
+  const file = new File([blob], name, { type: blob.type });
+  if (matchMedia('(pointer:coarse)').matches && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000); toast('Saved ' + name);
+}
+
+function buildCsv(H, rows) {
+  const safe = v => /^[=@]/.test(v) || /^[+-](?![\d\s()-]*$)/.test(v) ? "'" + v : v;
+  const q = v => '"' + safe(String(v ?? '')).replace(/"/g, '""') + '"';
+  return new Blob(['\ufeff' + [H].concat(rows).map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
+}
+
+function printReport(ix, rows, stamp) {
+  const cols = ['Member ID', 'Name', 'Gender', 'Phone', 'Email', 'Ministry', 'Fellowship Group', 'Member Type', 'Date Joined'];
+  const val = (r, c) => c === 'Name' ? r[ix['First Name']] + ' ' + r[ix['Last Name']] : r[ix[c]];
+  const n = (k, v) => rows.filter(r => r[ix[k]] === v).length;
+  $('#report').innerHTML = `<div class="rp-head"><img src="logo.png" alt=""><div><h2>${esc(CHURCH)} ${esc(SUB)}</h2><p>Member directory · ${esc(xo.scope)} · ${longDate()}</p></div></div>
+    <div class="rp-sum"><div><b>${rows.length}</b>Members</div><div><b>${n('Gender', 'Female')}</b>Female</div><div><b>${n('Gender', 'Male')}</b>Male</div><div><b>${n('Member Type', 'New member')}</b>New members</div><div><b>${n('Baptized', 'Yes')}</b>Baptized</div></div>
+    <table><thead><tr>${cols.map(k => `<th>${k}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(k => `<td>${esc(val(r, k))}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    <div class="rp-foot">${esc(CHURCH)} ${esc(SUB)} · Confidential: for church use only</div>`;
+  const old = document.title; document.title = 'RCCG-Members-' + stamp;
+  addEventListener('afterprint', () => { document.title = old; }, { once: true });
+  window.print();
+}
+
+/* --- Excel (.xlsx) written by hand: no libraries, works offline --- */
+const crcT = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = crcT[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zip(files) {
+  const enc = new TextEncoder(), parts = [], cen = []; let off = 0, size = 0;
+  const u16 = v => [v & 255, v >>> 8 & 255], u32 = v => [v & 255, v >>> 8 & 255, v >>> 16 & 255, v >>> 24 & 255];
+  for (const [name, text] of Object.entries(files)) {
+    const nb = enc.encode(name), d = enc.encode(text), crc = crc32(d), L = u32(d.length);
+    const local = new Uint8Array([0x50, 0x4b, 3, 4, 20, 0, 0, 8, 0, 0, 0, 0, 33, 0, ...u32(crc), ...L, ...L, ...u16(nb.length), 0, 0]);
+    parts.push(local, nb, d);
+    cen.push(new Uint8Array([0x50, 0x4b, 1, 2, 20, 0, 20, 0, 0, 8, 0, 0, 0, 0, 33, 0, ...u32(crc), ...L, ...L, ...u16(nb.length), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...u32(off)]), nb);
+    off += local.length + nb.length + d.length;
+  }
+  cen.forEach(c => size += c.length);
+  const end = new Uint8Array([0x50, 0x4b, 5, 6, 0, 0, 0, 0, ...u16(cen.length / 2), ...u16(cen.length / 2), ...u32(size), ...u32(off), 0, 0]);
+  return new Blob([...parts, ...cen, end], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+const xe = s => String(s ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const colL = i => { let s = ''; for (i++; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + (i - 1) % 26) + s; return s; };
+const xcell = (r, c, v, s) => typeof v === 'number' ? `<c r="${colL(c)}${r}" s="${s}"><v>${v}</v></c>` : `<c r="${colL(c)}${r}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`;
+function sheetXml(rows, o) {
+  const data = rows.map((r, i) => `<row r="${i + 1}"${o.rh && o.rh[i + 1] ? ` ht="${o.rh[i + 1]}" customHeight="1"` : ''}>${r.map(([v, s], c) => xcell(i + 1, c, v, s)).join('')}</row>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0">${o.freeze ? `<pane ySplit="${o.freeze}" topLeftCell="A${o.freeze + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft"/>` : ''}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="18"/><cols>${o.widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${data}</sheetData>${o.filter ? `<autoFilter ref="${o.filter}"/>` : ''}<mergeCells count="${o.merges.length}">${o.merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells><pageMargins left=".4" right=".4" top=".5" bottom=".5" header=".3" footer=".3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+}
+function stylesXml() {
+  const font = (sz, rgb, b) => `<font>${b ? '<b/>' : ''}<sz val="${sz}"/><color rgb="FF${rgb}"/><name val="Calibri"/></font>`;
+  const fill = rgb => `<fill><patternFill patternType="solid"><fgColor rgb="FF${rgb}"/><bgColor indexed="64"/></patternFill></fill>`;
+  const xf = (f, fl, b, al) => `<xf numFmtId="0" fontId="${f}" fillId="${fl}" borderId="${b}" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment ${al || 'vertical="center"'}/></xf>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="5">${font(11, '1D1D1F')}${font(11, 'FFFFFF', 1)}${font(18, '27196F', 1)}${font(11, '6E6E73')}${font(12, '27196F', 1)}</fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fill('27196F')}${fill('F5F5FA')}${fill('ECE9FA')}</fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFE5E5EA"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="8">${xf(0, 0, 0)}${xf(2, 0, 0)}${xf(3, 0, 0)}${xf(1, 2, 0, 'horizontal="left" vertical="center" wrapText="1" indent="1"')}${xf(0, 0, 1)}${xf(0, 3, 1)}${xf(4, 4, 0, 'horizontal="left" vertical="center" indent="1"')}${xf(0, 0, 1, 'horizontal="right" vertical="center"')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+}
+function buildXlsx(H, ix, rows) {
+  const W = { 'Member ID': 11, 'Date Added': 17, 'First Name': 16, 'Last Name': 16, Gender: 10, 'Date of Birth': 14, Phone: 17, Email: 28, Address: 30, 'Marital Status': 14, Occupation: 18, 'Member Type': 16, 'Date Joined': 13, Baptized: 10, Ministry: 16, 'Fellowship Group': 18, 'Invited By': 16, 'Follow-up Status': 17, Status: 10, Notes: 36 };
+  const n = H.length, pad = (k, s) => Array.from({ length: k }, () => ['', s]), last = colL(n - 1);
+  const sheet1 = [[[CHURCH + ' ' + SUB + ' · Member Registry', 1]].concat(pad(n - 1, 1)), [[rows.length + ' members · ' + xo.scope + ' · exported ' + longDate(), 2]].concat(pad(n - 1, 2)), pad(n, 0), H.map(h => [h, 3])]
+    .concat(rows.map((r, i) => r.map(v => [String(v ?? ''), i % 2 ? 5 : 4])));
+  const tally = (name, f, byKey) => { const t = {}; rows.forEach(r => { const k = (f ? f(r[ix[name]]) : r[ix[name]]) || 'Not given'; t[k] = (t[k] || 0) + 1; }); return Object.entries(t).sort((a, b) => byKey ? b[0].localeCompare(a[0]) : b[1] - a[1] || a[0].localeCompare(b[0])); };
+  const cnt = (k, v) => rows.filter(r => r[ix[k]] === v).length;
+  const S = [[['Member summary', 1], ['', 1]], [[rows.length + ' members · ' + xo.scope + ' · exported ' + longDate(), 2], ['', 2]], [['', 0], ['', 0]]];
+  const section = (title, entries) => { S.push([[title, 6], ['', 6]]); entries.forEach(([k, v]) => S.push([[k, 4], [v, 7]])); S.push([['', 0], ['', 0]]); };
+  section('Overview', [['Total members', rows.length], ['New members', cnt('Member Type', 'New member')], ['Existing members', cnt('Member Type', 'Existing member')], ['Baptized', cnt('Baptized', 'Yes')], ['Need follow-up', cnt('Follow-up Status', 'Needs follow-up')]]);
+  section('Gender', tally('Gender')); section('Marital status', tally('Marital Status')); section('Ministry', tally('Ministry')); section('Fellowship group', tally('Fellowship Group'));
+  section('Year joined', tally('Date Joined', v => String(v).slice(0, 4), true));
+  const X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships', M = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main', CT = 'application/vnd.openxmlformats-officedocument.spreadsheetml.';
+  return zip({
+    '[Content_Types].xml': `${X}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${CT}sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="${CT}worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="${CT}worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="${CT}styles+xml"/></Types>`,
+    '_rels/.rels': `${X}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+    'xl/workbook.xml': `${X}<workbook xmlns="${M}" xmlns:r="${R}"><sheets><sheet name="Members" sheetId="1" r:id="rId1"/><sheet name="Summary" sheetId="2" r:id="rId2"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">Members!$A$4:$${last}$${rows.length + 4}</definedName></definedNames></workbook>`,
+    'xl/_rels/workbook.xml.rels': `${X}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${R}/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="${R}/styles" Target="styles.xml"/></Relationships>`,
+    'xl/styles.xml': stylesXml(),
+    'xl/worksheets/sheet1.xml': sheetXml(sheet1, { widths: H.map(h => W[h] || 16), freeze: 4, filter: `A4:${last}${rows.length + 4}`, merges: [`A1:${last}1`, `A2:${last}2`], rh: { 1: 34, 4: 28 } }),
+    'xl/worksheets/sheet2.xml': sheetXml(S, { widths: [34, 12], merges: ['A1:B1', 'A2:B2'], rh: { 1: 34 } })
+  });
+}
+
 /* ---------- Members list (admin) ---------- */
 function showList() {
-  shell(`<h1>Members</h1><p class="sub" id="count">Loading…</p>
+  shell(`<div class="lhead"><div><h1>Members</h1><p class="sub" id="count">Loading…</p></div><button class="btn sm" id="exp">Download</button></div>
     <input id="q" type="search" placeholder="Search by name, phone, ministry or group" autocomplete="off">
     <div style="margin-top:12px" id="rows"></div>`, true);
-  let t; $('#q').oninput = () => { clearTimeout(t); t = setTimeout(load, 250); };
+  $('#exp').onclick = () => go('export'); let t; $('#q').oninput = () => { clearTimeout(t); t = setTimeout(load, 250); };
   load();
 }
 async function load() {
