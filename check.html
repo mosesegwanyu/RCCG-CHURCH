@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Install check</title>
+<style>
+body{font-family:-apple-system,system-ui,Roboto,sans-serif;margin:0;padding:22px 18px 40px;background:#F5F5F7;color:#1D1D1F;max-width:560px;margin:auto}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}p{color:#6E6E73;line-height:1.5;margin:0 0 14px}
+.r{display:flex;gap:12px;background:#fff;border-radius:14px;padding:13px 15px;margin:8px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.r>b{flex:none;width:22px;font-size:18px}.ok>b{color:#198847}.bad>b{color:#D0342C}.warn>b{color:#B45309}
+.r small{display:block;color:#6E6E73;margin-top:3px;line-height:1.45;word-break:break-word}
+.v{border-radius:14px;padding:14px 16px;margin:14px 0;font-weight:600;line-height:1.5}.v.ok{background:#E3F4EA;color:#14693A}.v.bad{background:#FBE5E3;color:#9B1C1C}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:15px;background:#27196F;color:#fff;width:100%;margin-top:10px}
+</style></head><body>
+<h1>Install check</h1>
+<p>Open this page in Chrome on the phone that cannot install. Wait about five seconds, then take a screenshot, or tap Copy report and paste it into a message.</p>
+<div id="out"></div><div id="verdict"></div><button id="cp">Copy report</button>
+<script>
+const out = document.getElementById('out'), log = []; let bad = 0, deferred = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function add(s, t, d) {
+  if (s === 'bad') bad++;
+  log.push((s === 'ok' ? 'OK   ' : s === 'bad' ? 'FAIL ' : 'WARN ') + t + (d ? ' - ' + d : ''));
+  const e = document.createElement('div'); e.className = 'r ' + s;
+  e.innerHTML = '<b>' + (s === 'ok' ? '✓' : s === 'bad' ? '✕' : '!') + '</b><div>' + esc(t) + (d ? '<small>' + esc(d) + '</small>' : '') + '</div>'; out.appendChild(e);
+}
+(async () => {
+  const ua = navigator.userAgent, base = location.href.replace(/[^/]*$/, '');
+  add(isSecureContext ? 'ok' : 'bad', 'Secure connection (https)', location.origin);
+  const other = /SamsungBrowser|OPR\/|Opera|UCBrowser|MiuiBrowser|EdgA|Firefox|HuaweiBrowser|OPT\//.exec(ua), cv = /Chrome\/(\d+)/.exec(ua);
+  if (/; wv\)|FBAN|FBAV|Instagram|WhatsApp/i.test(ua)) add('bad', 'You are inside an in-app browser', 'Links opened from WhatsApp or Facebook open in a mini browser that cannot install apps. Tap the menu (three dots), choose Open in Chrome, and try again.');
+  else if (other) add('warn', 'Browser: ' + other[0], 'Chrome is the most reliable browser for installing. Try the same link in Chrome.');
+  else if (cv) add(+cv[1] >= 90 ? 'ok' : 'warn', 'Chrome version ' + cv[1], +cv[1] >= 90 ? '' : 'This Chrome is old. Update it from the Play Store.');
+  else add('warn', 'Browser not recognised', ua);
+  if (matchMedia('(display-mode: standalone)').matches) add('ok', 'Running as an installed app already');
+
+  let man = null, mres;
+  try {
+    mres = await fetch(base + 'manifest.webmanifest', { cache: 'no-store' });
+    const ct = mres.headers.get('content-type') || '', dt = mres.headers.get('date');
+    if (!mres.ok) add('bad', 'manifest.webmanifest not found (' + mres.status + ')', 'Upload manifest.webmanifest to the same GitHub folder as index.html, with exactly this name.');
+    else { try { man = await mres.json(); add('ok', 'Manifest found', ct); } catch (e) { add('bad', 'Manifest is not valid', 'The file exists but cannot be read. Re-upload it.'); } }
+    if (dt) { const diff = Math.abs(new Date(dt) - new Date()) / 6e4; add(diff > 1440 ? 'bad' : diff > 10 ? 'warn' : 'ok', 'Phone clock is ' + (diff < 2 ? 'correct' : Math.round(diff) + ' minutes off'), diff > 10 ? 'Turn on automatic date and time in the phone settings. A wrong clock blocks installing.' : ''); }
+  } catch (e) { add('bad', 'Could not reach manifest.webmanifest', 'Check the phone has internet.'); }
+
+  if (man) {
+    for (const k of ['name', 'short_name', 'start_url', 'display']) add(man[k] ? 'ok' : 'bad', 'Manifest ' + k + ': ' + (man[k] || 'missing'));
+    const icons = man.icons || [], has = n => icons.some(i => (i.sizes || '').split(' ').includes(n + 'x' + n) && /png/.test(i.type || ''));
+    add(has(192) && has(512) ? 'ok' : 'bad', 'Icons declared: 192 and 512 PNG', has(192) && has(512) ? '' : 'The manifest must list a 192x192 and a 512x512 PNG icon.');
+    for (const i of icons) {
+      try {
+        const r = await fetch(new URL(i.src, base + 'manifest.webmanifest'), { cache: 'no-store' });
+        if (!r.ok) { add('bad', i.src + ' is missing (' + r.status + ')', 'Android cannot install while an icon in the manifest is missing. Upload ' + i.src + ' to GitHub.'); continue; }
+        const bm = await createImageBitmap(await r.blob()), want = (i.sizes || '').split('x')[0];
+        add(String(bm.width) === want ? 'ok' : 'warn', i.src + ' loads (' + bm.width + 'x' + bm.height + ', ' + (i.purpose || 'any') + ')', String(bm.width) === want ? '' : 'Declared as ' + i.sizes + ' but the picture is ' + bm.width + 'x' + bm.height + '.');
+      } catch (e) { add('bad', i.src + ' cannot be read as a picture', 'Re-upload this file.'); }
+    }
+  }
+  try { const r = await fetch(base + 'sw.js', { cache: 'no-store' }); add(r.ok ? 'ok' : 'bad', 'sw.js ' + (r.ok ? 'found' : 'missing (' + r.status + ')'), r.ok ? '' : 'Upload sw.js to the same folder as index.html.'); } catch (e) { add('bad', 'Could not reach sw.js'); }
+  try {
+    const reg = await navigator.serviceWorker.getRegistration(base);
+    if (!reg) add('warn', 'Offline engine is not active yet', 'Open the main app page once, wait a few seconds, then reopen this check.');
+    else add(navigator.serviceWorker.controller ? 'ok' : 'warn', navigator.serviceWorker.controller ? 'Offline engine is running' : 'Offline engine is registered but not controlling this page', navigator.serviceWorker.controller ? '' : 'Reload this page once.');
+  } catch (e) { add('warn', 'Offline engine unavailable', String(e)); }
+
+  await new Promise(r => setTimeout(r, 2500));
+  add(deferred ? 'ok' : 'warn', deferred ? 'Chrome says this app can be installed' : 'Chrome has not offered installation yet', deferred ? '' : 'If everything above is green: reload once, wait, and check the Chrome menu for Install app. If the app is already installed, Chrome hides the offer.');
+  const v = document.getElementById('verdict');
+  v.className = 'v ' + (bad ? 'bad' : 'ok');
+  v.textContent = bad ? bad + ' problem' + (bad > 1 ? 's' : '') + ' found. Fix the red items first, then run this check again.' : 'No problem found in the app files. If installing still fails, the cause is on the phone: update Chrome and Google Play services, free up storage, check the phone has a Google account and the Play Store enabled, and turn on automatic date and time.';
+  log.push(bad ? 'RESULT: ' + bad + ' problem(s)' : 'RESULT: files look fine');
+})();
+document.getElementById('cp').onclick = async e => { const t = 'Install check\n' + navigator.userAgent + '\n' + log.join('\n'); try { await navigator.clipboard.writeText(t); e.target.textContent = 'Copied. Paste it into a message.'; } catch (x) { e.target.textContent = 'Could not copy. Please take a screenshot.'; } };
+</script></body></html>
