@@ -193,7 +193,7 @@ async function run(fn, ...a) {
     return { total: db.length, rows: db.slice().reverse().filter(m => !q || JSON.stringify(m).toLowerCase().includes(q)) };
   }
 }
-const toast = t => { const el = $('#toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); };
+const toast = (t, ms = 2600) => { const el = $('#toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), ms); };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.title = CHURCH + ' ' + SUB; $('#bName').textContent = CHURCH; $('#bSub').textContent = SUB;
 
@@ -603,7 +603,7 @@ async function load() {
 }
 
 let ip; addEventListener('beforeinstallprompt', e => { e.preventDefault(); ip = e; });
-document.addEventListener('click', e => { if (e.target.closest('.install')) { if (ip) { ip.prompt(); ip = null; } else toast('iPhone: tap Share, then Add to Home Screen. Computer: use the install icon in the address bar.'); } });
+document.addEventListener('click', e => { if (e.target.closest('.install')) { if (ip) { ip.prompt(); ip = null; } else { const u = navigator.userAgent; toast(/; wv\)|FBAN|FBAV|Instagram|WhatsApp/i.test(u) ? 'This is an in-app browser. Tap the menu (three dots), choose Open in Chrome, then install.' : /Android/i.test(u) ? 'In Chrome, tap the menu (three dots), then Install app.' : /iPhone|iPad/i.test(u) ? 'Tap Share, then Add to Home Screen.' : 'Use the install icon in the address bar.', 7000); } } });
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 addEventListener('online', () => { updateChip(); sync(); if (tab === 'home' && role) home(); });
 addEventListener('offline', () => { updateChip(); if (tab === 'home' && role) home(); });
