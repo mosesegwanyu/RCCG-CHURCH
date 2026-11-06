@@ -75,6 +75,7 @@ td.n{font-weight:600}
 .pill.new{background:#FFF1D6;color:#8A5A00}
 .empty{text-align:center;color:var(--muted);padding:40px 0}
 .scroll{overflow-x:auto}
+.chip{border:0;font:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;background:#FFF1D6;color:#8A5A00;cursor:pointer}.chip.off{background:#FFE1E1;color:#9B1C1C}.qrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--bg)}.qrow small{color:var(--muted)}.qb{display:flex;gap:2px;flex-shrink:0}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 :focus-visible{outline:3px solid rgba(109,59,234,.5);outline-offset:2px}
@@ -84,14 +85,14 @@ td.n{font-weight:600}
 </head>
 <body>
 <header>
-  <div class="brand" id="brand">Member registry<small>Member registry</small></div>
-  <button class="link" id="install" hidden>Install app</button><div class="who" id="who" hidden><span id="roleLabel"></span><button class="link" id="lock">Lock</button></div>
+  <div class="brand" id="brand">Grace Community Church<small>Member registry</small></div>
+  <button class="link" id="install" hidden>Install app</button><div class="who" id="who" hidden><button class="chip" id="sync" hidden></button><span id="roleLabel"></span><button class="link" id="lock">Lock</button></div>
 </header>
 <div id="config" hidden
   data-church="RCCG - Redeemed Christians Church of God - Temple of God"
   data-api="https://script.google.com/macros/s/AKfycbxGAvO2_QgdjIkHIsCzbG8uWIypFCLXfISSVxRx6sthEQBNcHvwyEsSkhzwOFKHmJ6eGQ/exec"
   data-ministries="Choir, Ushering, Youth, Children, Women, Men, Media, Prayer, Welfare, None yet"></div>
-<main><div class="card" id="card"><h1>Loading…</h1><p class="sub">If this message stays, open the app from its website link in Chrome, Safari or Edge. A file preview or a downloaded copy cannot run the app.</p></div></main>
+<main><div class="card" id="card"></div></main>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -110,10 +111,11 @@ const API_URL = (cfg.api || '').trim();
 async function run(fn, ...a) {
   if (API_URL) {
     let j; try { const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn, args: a }) }); j = await r.json(); }
-    catch (e) { throw new Error('Cannot reach the registry. Check the Web app URL, and that its access is set to Anyone.'); }
+    catch (e) { const er = new Error(navigator.onLine ? 'Cannot reach the registry. Check the Web app URL, and that its access is set to Anyone.' : 'You are offline.'); er.offline = true; throw er; }
     if (j.error) throw new Error(j.error); return j.result;
   }
   await new Promise(r => setTimeout(r, 350)); // demo mode: data stays in this browser only
+  if (!navigator.onLine) { const er = new Error('You are offline.'); er.offline = true; throw er; }
   const role = a[0] === 'admin' ? 'admin' : a[0] === 'welcome' ? 'entry' : null;
   if (!role) throw new Error('That access code is not correct.');
   if (fn === 'login') return { role };
@@ -149,8 +151,16 @@ function showLogin() {
     <div class="actions"><span></span><button class="btn" id="go">Continue</button></div>`;
   const submit = async () => {
     const b = $('#go'); b.disabled = true; $('#err').textContent = '';
-    try { const r = await run('login', $('#code').value); code = $('#code').value; role = r.role; start(); }
-    catch (e) { $('#err').textContent = e.message; b.disabled = false; }
+    const typed = $('#code').value;
+    try { const r = await run('login', typed); code = typed; role = r.role; await rememberAuth(typed, role); syncBlocked = false; start(); sync(); return; }
+    catch (e) {
+      if (e.offline) {
+        const r = await checkAuth(typed);
+        if (r) { code = typed; role = r; start(); return; }
+        $('#err').textContent = localStorage.getItem('auth') ? 'That access code is not correct.' : 'You are offline. The first sign-in on a phone needs internet.';
+      } else $('#err').textContent = e.message;
+      b.disabled = false;
+    }
   };
   $('#go').onclick = submit;
   $('#code').onkeydown = e => { if (e.key === 'Enter') submit(); };
@@ -160,7 +170,7 @@ $('#lock').onclick = showLogin;
 function start() {
   $('#who').hidden = false;
   $('#roleLabel').textContent = role === 'admin' ? 'Admin' : 'Data entry';
-  tab = 'add'; newForm();
+  tab = 'add'; newForm(); updateChip();
 }
 
 /* ---------- Shell with tabs (admin only) ---------- */
@@ -174,7 +184,7 @@ function shell(inner, wide) {
 /* ---------- Add member: 3 steps ---------- */
 function newForm() {
   step = 0;
-  data = { gender: '', memberType: 'New member', baptized: '', dateJoined: new Date().toISOString().slice(0, 10) };
+  data = { clientId: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), capturedAt: Date.now(), gender: '', memberType: 'New member', baptized: '', dateJoined: new Date().toISOString().slice(0, 10) };
   render();
 }
 
@@ -278,8 +288,65 @@ async function save(confirmDuplicate) {
       <button class="btn block" id="again">Add another member</button></div>`);
     $('#again').onclick = newForm; $('#again').focus();
   } catch (e) {
+    if (e.offline) {
+      enqueue({ ...data, confirmDuplicate });
+      shell(`<div class="done"><div class="tick" style="background:#FFF1D6"><svg viewBox="0 0 24 24" style="stroke:#B7791F;stroke-dasharray:none;stroke-dashoffset:0;animation:none"><circle cx="12" cy="12" r="9" style="fill:none"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1>Saved on this phone</h1><p class="sub">${esc(data.firstName + ' ' + data.lastName)} will upload automatically when you are back online.</p>
+        <button class="btn block" id="again">Add another member</button></div>`);
+      $('#again').onclick = newForm; $('#again').focus(); return;
+    }
     toast(e.message); if (b) { b.disabled = false; b.textContent = 'Save member'; }
   }
+}
+
+/* ---------- Offline: sign-in memory, queue, sync ---------- */
+async function sha(s) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('registry:' + s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+async function rememberAuth(c, r) { try { localStorage.setItem('auth', JSON.stringify({ [await sha(c)]: r })); } catch (e) {} }
+async function checkAuth(c) { try { return JSON.parse(localStorage.getItem('auth') || '{}')[await sha(c)] || null; } catch (e) { return null; } }
+
+const getQ = () => { try { return JSON.parse(localStorage.getItem('queue') || '[]'); } catch (e) { return []; } };
+function setQ(q) { try { localStorage.setItem('queue', JSON.stringify(q)); } catch (e) { toast('Phone storage is full. Connect soon to upload.'); } updateChip(); }
+function enqueue(d) { const q = getQ(); q.push({ id: d.clientId, data: d, status: 'pending' }); setQ(q); }
+
+let syncing = false, syncBlocked = false;
+async function sync() {
+  if (syncing || syncBlocked || !code || !navigator.onLine) return;
+  const q = getQ(); if (!q.some(i => i.status === 'pending')) return;
+  syncing = true; let done = 0;
+  try {
+    for (const it of q) {
+      if (it.status !== 'pending') continue;
+      try {
+        const r = await run('addMember', code, it.data);
+        if (r.duplicate) { it.status = 'review'; it.dup = { name: r.name, id: r.id }; } else { it.gone = true; done++; }
+        setQ(q.filter(x => !x.gone));
+      } catch (e) { if (!e.offline) { syncBlocked = true; toast(e.message + ' Sign in again to upload.'); } break; }
+    }
+  } finally { syncing = false; }
+  if (done) toast(done + (done > 1 ? ' members' : ' member') + ' uploaded to the registry');
+  updateChip(); if (tab === 'sync') showPending();
+}
+
+function updateChip() {
+  const n = getQ().length, off = !navigator.onLine, c = $('#sync');
+  c.hidden = !role || !(n || off);
+  c.textContent = off ? (n ? 'Offline · ' + n + ' waiting' : 'Offline') : n + ' waiting to upload';
+  c.className = 'chip' + (off ? ' off' : '');
+}
+$('#sync').onclick = () => showPending();
+
+function showPending() {
+  tab = 'sync'; const q = getQ();
+  shell(`<h1>Waiting to upload</h1><p class="sub">${navigator.onLine ? 'Saved on this phone, not in the registry yet.' : 'You are offline. These upload automatically when you are back online.'}</p>
+    ${q.length ? q.map(i => `<div class="qrow"><div><b>${esc(i.data.firstName + ' ' + i.data.lastName)}</b><br><small>${i.status === 'review' ? 'Already registered as ' + esc(i.dup.name) + ' (' + esc(i.dup.id) + ')' : 'Waiting for connection'}</small></div>${i.status === 'review' ? `<div class="qb"><button class="link" data-k="${esc(i.id)}" data-a="keep">Save anyway</button><button class="link" data-k="${esc(i.id)}" data-a="drop">Discard</button></div>` : ''}</div>`).join('') : '<div class="empty">Everything is uploaded.</div>'}
+    <div class="actions"><button class="btn ghost" id="back2">Add member</button><button class="btn" id="now">Upload now</button></div>`);
+  card.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
+    let q2 = getQ(); const it = q2.find(x => x.id === b.dataset.k);
+    if (b.dataset.a === 'drop') q2 = q2.filter(x => x !== it); else { it.data.confirmDuplicate = true; it.status = 'pending'; }
+    setQ(q2); showPending(); sync();
+  });
+  $('#back2').onclick = () => { tab = 'add'; newForm(); };
+  $('#now').onclick = () => { syncBlocked = false; sync().then(showPending); };
 }
 
 /* ---------- Members list (admin) ---------- */
@@ -298,7 +365,7 @@ async function load() {
       r.rows.map(m => `<tr><td class="n">${esc(m.name)}<br><small style="color:var(--muted);font-weight:400">${esc(m.id)}</small></td><td>${esc(m.phone)}</td><td>${esc(m.ministry)}</td><td>${esc(m.joined)}</td>
       <td>${m.followUp ? `<span class="pill new">${esc(m.followUp)}</span>` : '<span class="pill">Active</span>'}</td></tr>`).join('')}</tbody></table>`
       : '<div class="empty">No members match that search.</div>';
-  } catch (e) { toast(e.message); }
+  } catch (e) { if (e.offline) $('#count').textContent = 'You are offline. Connect to view members.'; else toast(e.message); }
 }
 
 if (!API_URL) $('#brand small').textContent = 'Demo mode: try codes welcome or admin';
@@ -306,6 +373,9 @@ let ip; addEventListener('beforeinstallprompt', e => { e.preventDefault(); ip = 
 if (!matchMedia('(display-mode: standalone)').matches) $('#install').hidden = false;
 $('#install').onclick = async () => { if (ip) { ip.prompt(); ip = null; } else toast('iPhone: tap Share, then Add to Home Screen. Desktop: use the install icon in the address bar.'); };
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
+addEventListener('online', () => { updateChip(); sync(); });
+addEventListener('offline', updateChip);
+setInterval(sync, 30000);
 showLogin();
 </script>
 </body>
