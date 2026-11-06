@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RCCG Temple of God</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0B0C17" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="RCCG Registry">
+<style>
+:root{color-scheme:light dark;--navy:#27196F;--navy2:#3B2A94;--red:#D0342C;--green:#198847;--accent:#27196F;
+--bg:#F5F5F7;--card:#fff;--fill:#F2F2F7;--ink:#1D1D1F;--muted:#6E6E73;--line:#E5E5EA;--tint:#ECE9FA;--err:#C62828;
+--sh:0 1px 2px rgba(20,16,60,.05),0 14px 34px -14px rgba(20,16,60,.2);--glass:rgba(245,245,247,.8)}
+@media(prefers-color-scheme:dark){:root{--accent:#A99CFF;--bg:#0B0C17;--card:#151728;--fill:#212339;--ink:#F5F5F7;--muted:#9EA1B8;--line:#2A2D45;--tint:#26224F;--err:#FF7B7B;
+--sh:0 1px 2px rgba(0,0,0,.4),0 14px 34px -14px rgba(0,0,0,.7);--glass:rgba(11,12,23,.8)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(760px 380px at 50% -90px,rgba(59,42,148,.2),transparent 70%),radial-gradient(420px 300px at 100% 100%,rgba(25,136,71,.1),transparent 70%),radial-gradient(420px 300px at 0 100%,rgba(208,52,44,.09),transparent 70%)}
+#top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px;background:var(--glass);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border-bottom:1px solid var(--line)}
+.brandrow{display:flex;align-items:center;gap:10px;min-width:0}.brandrow img{width:36px;height:36px;flex:none}
+.brand b{display:block;font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.15}.brand small{color:var(--muted);font-size:12px}
+.who{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.link{background:none;border:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:6px 8px;border-radius:8px}
+.link:hover{background:var(--tint)}
+main{flex:1;display:flex;justify-content:center;padding:18px 16px calc(118px + env(safe-area-inset-bottom))}
+.card{width:100%;max-width:560px;background:var(--card);border-radius:26px;padding:34px;box-shadow:var(--sh);align-self:flex-start;animation:rise .4s both}
+.card.wide{max-width:880px}
+.card.bare,.card.hub{background:none;box-shadow:none;padding:0}.card.hub{max-width:640px}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+h1{font-size:30px;line-height:1.12;letter-spacing:-.03em;margin:0 0 8px;font-weight:800}
+p.sub{margin:0 0 26px;color:var(--muted);font-size:15px;line-height:1.5}
+/* welcome */
+.hero{text-align:center;padding:22px 0 26px}
+.logo{width:132px;height:132px;filter:drop-shadow(0 16px 26px rgba(39,25,111,.32));animation:rise .7s both}
+.org{font-size:44px;font-weight:800;letter-spacing:-.04em;margin:20px 0 2px;line-height:1}
+.org2{font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--accent)}
+.eyebrow{display:inline-block;margin-top:14px;padding:5px 13px;border-radius:99px;background:rgba(208,52,44,.1);color:var(--red);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.panel{max-width:420px;margin:0 auto;background:var(--card);border-radius:26px;padding:26px;box-shadow:var(--sh)}
+.demo{margin:16px 0 0;text-align:center;font-size:13px;color:var(--muted)}
+.verse{max-width:380px;margin:30px auto 0;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6;font-style:italic}
+.verse b{display:block;font-style:normal;font-size:11px;letter-spacing:.14em;margin-top:8px;color:var(--accent)}
+.install{display:block;margin:18px auto 0}
+@media(display-mode:standalone){.install{display:none!important}}
+/* home */
+.greet{margin:4px 4px 20px}.greet small{display:block;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.greet h1{font-size:36px}.greet p{margin:0;color:var(--muted);font-size:15px}
+.hero-tile{all:unset;box-sizing:border-box;cursor:pointer;display:flex;width:100%;align-items:center;justify-content:space-between;gap:16px;padding:28px 24px;border-radius:28px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#3B2A94 0%,#27196F 55%,#1B1150 100%);box-shadow:0 20px 44px -18px rgba(39,25,111,.7);transition:transform .15s}
+.hero-tile::before{content:"";position:absolute;right:-60px;top:-70px;width:230px;height:230px;border-radius:50%;border:26px solid rgba(255,255,255,.07)}
+.hero-tile::after{content:"";position:absolute;left:-50px;bottom:-70px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(25,136,71,.55),transparent 70%)}
+.hero-tile>div{position:relative;z-index:1}.hero-tile b{display:block;font-size:23px;letter-spacing:-.02em;margin-bottom:5px}.hero-tile span{font-size:14px;opacity:.8;line-height:1.4}
+.hero-tile i{position:relative;z-index:1;flex:none;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.17);display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.stat{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--sh)}
+.stat b{display:block;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.1}.stat span{font-size:12.5px;color:var(--muted)}
+.stat.navy b{color:var(--accent)}.stat.green b{color:var(--green)}.stat.red b{color:var(--red)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:14px}
+.tile{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:3px;transition:transform .15s}
+.tile b{font-size:16px;margin-top:10px}.tile span{font-size:13px;color:var(--muted)}
+.tile:active,.hero-tile:active{transform:scale(.98)}
+.ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center}
+.ic.navy{background:rgba(59,42,148,.13);color:var(--accent)}.ic.red{background:rgba(208,52,44,.13);color:var(--red)}.ic.green{background:rgba(25,136,71,.15);color:var(--green)}
+.ic svg,.hero-tile svg,#nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.list{background:var(--card);border-radius:22px;padding:6px 18px 8px;margin-top:14px;box-shadow:var(--sh)}
+.list h3{font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 6px}
+.li{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-size:15px}.li small{color:var(--muted)}
+/* nav */
+#nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:30;display:flex;gap:2px;padding:6px;border-radius:30px;background:var(--glass);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);box-shadow:0 14px 36px rgba(20,16,60,.24),0 0 0 1px var(--line)}
+#nav button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 22px;border-radius:24px;color:var(--muted);font-size:11px;font-weight:600;transition:background .2s,color .2s}
+#nav button.on{background:var(--tint);color:var(--accent)}
+/* forms */
+.bar{display:flex;gap:6px;margin-bottom:28px}.bar i{flex:1;height:5px;border-radius:5px;background:var(--line);transition:background .3s}
+.bar i.on{background:var(--navy2)}.bar i:nth-child(2).on{background:var(--red)}.bar i:nth-child(3).on{background:var(--green)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}label span{font-weight:400;color:var(--muted)}
+input,select,textarea{width:100%;font:inherit;font-size:17px;padding:15px 16px;border:1.5px solid transparent;border-radius:14px;background:var(--fill);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s,background .15s}
+textarea{resize:vertical;min-height:84px}
+input:focus,select:focus,textarea:focus{background:var(--card);border-color:var(--navy2);box-shadow:0 0 0 4px rgba(59,42,148,.2)}
+.bad input,.bad select{border-color:var(--err)}.msg{color:var(--err);font-size:12.5px;margin-top:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{flex:1;min-width:84px;font:inherit;font-weight:600;font-size:16px;padding:14px 12px;border-radius:14px;border:1.5px solid transparent;background:var(--fill);color:var(--ink);cursor:pointer;transition:all .15s}
+.chips button.on{background:linear-gradient(180deg,var(--navy2),var(--navy));color:#fff}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg button{text-align:left;padding:16px;border-radius:16px;border:1.5px solid transparent;background:var(--fill);color:var(--ink);font:inherit;cursor:pointer;transition:all .15s}
+.seg button b{display:block;font-size:15px;margin-bottom:3px}.seg button small{color:var(--muted);font-size:12.5px}
+.seg button.on{border-color:var(--navy2);background:var(--tint)}
+.actions{display:flex;justify-content:space-between;align-items:center;margin-top:30px;gap:12px}
+.btn{font:inherit;font-weight:600;font-size:17px;border:0;border-radius:14px;padding:16px 28px;cursor:pointer;background:linear-gradient(180deg,var(--navy2),var(--navy));color:#fff;box-shadow:0 8px 20px -8px rgba(39,25,111,.7);transition:filter .15s,transform .08s}
+.btn:hover{filter:brightness(1.1)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.6;cursor:wait}
+.btn.ghost{background:none;box-shadow:none;color:var(--muted);padding-left:8px;padding-right:8px}.btn.ghost:hover{color:var(--ink);filter:none}
+.btn.block{width:100%}.panel .btn{margin-top:16px}
+.step{animation:rise .3s both}
+.done{text-align:center;padding:10px 0}
+.tick{width:76px;height:76px;border-radius:50%;background:rgba(25,136,71,.14);margin:0 auto 20px;display:grid;place-items:center}
+.tick svg{width:36px;height:36px;stroke:var(--green);stroke-width:3;fill:none;stroke-dasharray:40;stroke-dashoffset:40;animation:draw .5s .1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.idtag{display:inline-block;margin:6px 0 24px;padding:7px 15px;background:var(--fill);border-radius:99px;font-weight:700;font-size:14px}
+.warn{background:rgba(245,158,11,.14);border-radius:14px;padding:14px 16px;font-size:14px;margin-bottom:18px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12.5px;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:13px 10px;border-bottom:1px solid var(--line)}td.n{font-weight:600}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;background:rgba(25,136,71,.14);color:var(--green);font-size:12px;font-weight:600}
+.pill.new{background:rgba(208,52,44,.12);color:var(--red)}
+.empty{text-align:center;color:var(--muted);padding:40px 0}.scroll{overflow-x:auto}
+.chip{border:0;font:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;background:rgba(245,158,11,.18);color:#B45309;cursor:pointer}.chip.off{background:rgba(208,52,44,.14);color:var(--red)}
+.qrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.qrow small{color:var(--muted)}.qb{display:flex;gap:2px;flex-shrink:0}
+.toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:14px;font-size:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}
+:focus-visible{outline:3px solid rgba(59,42,148,.55);outline-offset:2px}
+@media(max-width:560px){.card{padding:26px 20px}.grid{grid-template-columns:1fr}.seg{grid-template-columns:1fr}.org{font-size:38px}#roleLabel{display:none}.stat b{font-size:26px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header id="top" hidden>
+  <div class="brandrow"><img src="logo.png" alt="" width="36" height="36"><div class="brand"><b id="bName"></b><small id="bSub"></small></div></div>
+  <div class="who"><button class="chip" id="sync" hidden></button><span id="roleLabel"></span><button class="link" id="lock">Lock</button></div>
+</header>
+<div id="config" hidden data-church="RCCG" data-sub="Temple of God" data-api="https://script.google.com/macros/s/AKfycbxGAvO2_QgdjIkHIsCzbG8uWIypFCLXfISSVxRx6sthEQBNcHvwyEsSkhzwOFKHmJ6eGQ/exec" data-ministries="Choir, Ushering, Youth, Children, Women, Men, Media, Prayer, Welfare, None yet"></div>
+<main><div class="card" id="card"><h1>Loading…</h1><p class="sub">If this message stays, open the app from its website link in Chrome, Safari or Edge. A file preview or a downloaded copy cannot run the app.</p></div></main>
+<nav id="nav" hidden></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+window.addEventListener('error', e => { const c = document.getElementById('card'); if (c && !c.children.length) c.innerHTML = '<h1>Something went wrong</h1><p class="sub">The page could not start: ' + String(e.message).replace(/</g,'&lt;') + '</p>'; });
+</script>
+<script>
+const cfg = document.getElementById('config').dataset;
+const CHURCH = cfg.church || 'Church', SUB = cfg.sub || '';
+const MINISTRIES = (cfg.ministries || '').split(',').map(s => s.trim()).filter(Boolean);
+
+const $ = s => document.querySelector(s);
+const card = $('#card');
+let code = '', role = '', step = 0, data = {}, tab = 'add';
+
+const API_URL = (cfg.api || '').trim();
+async function run(fn, ...a) {
+  if (API_URL) {
+    let j; try { const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn, args: a }) }); j = await r.json(); }
+    catch (e) { const er = new Error(navigator.onLine ? 'Cannot reach the registry. Check the Web app URL, and that its access is set to Anyone.' : 'You are offline.'); er.offline = true; throw er; }
+    if (j.error) throw new Error(j.error); return j.result;
+  }
+  await new Promise(r => setTimeout(r, 350)); // demo mode: data stays in this browser only
+  if (!navigator.onLine) { const er = new Error('You are offline.'); er.offline = true; throw er; }
+  const role = a[0] === 'admin' ? 'admin' : a[0] === 'welcome' ? 'entry' : null;
+  if (!role) throw new Error('That access code is not correct.');
+  if (fn === 'login') return { role };
+  let db = []; try { db = JSON.parse(localStorage.getItem('demo') || '[]'); } catch (e) {}
+  if (fn === 'addMember') {
+    const d = a[1], dg = s => String(s).replace(/\D/g, '');
+    const dup = db.find(m => dg(m.phone) === dg(d.phone));
+    if (dup && !d.confirmDuplicate) return { duplicate: true, name: dup.name, id: dup.id };
+    const id = 'M-' + String(db.length + 1).padStart(4, '0'), name = d.firstName + ' ' + d.lastName;
+    db.push({ id, name, phone: d.phone, ministry: d.ministry || '', joined: d.dateJoined, dob: d.dob || '', followUp: d.memberType === 'New member' ? 'Needs follow-up' : '' });
+    try { localStorage.setItem('demo', JSON.stringify(db)); } catch (e) {}
+    return { ok: true, id, name };
+  }
+  if (fn === 'stats') {
+    if (role !== 'admin') throw new Error('This needs the admin code.');
+    const t = new Date(), t0 = new Date(t.getFullYear(), t.getMonth(), t.getDate()), ym = t.toISOString().slice(0, 7);
+    const bd = db.filter(x => x.dob).map(x => { const d = new Date(x.dob); return { name: x.name, diff: Math.round((new Date(t.getFullYear(), d.getMonth(), d.getDate()) - t0) / 864e5) }; })
+      .filter(x => x.diff >= 0 && x.diff <= 7).map(x => ({ name: x.name, when: x.diff ? 'in ' + x.diff + ' days' : 'Today' }));
+    return { total: db.length, month: db.filter(x => (x.joined || '').startsWith(ym)).length, followUp: db.filter(x => x.followUp).length, birthdays: bd };
+  }
+  if (fn === 'listMembers') {
+    if (role !== 'admin') throw new Error('This needs the admin code.');
+    const q = String(a[1] || '').toLowerCase();
+    return { total: db.length, rows: db.slice().reverse().filter(m => !q || JSON.stringify(m).toLowerCase().includes(q)) };
+  }
+}
+const toast = t => { const el = $('#toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.title = CHURCH + ' ' + SUB; $('#bName').textContent = CHURCH; $('#bSub').textContent = SUB;
+
+/* ---------- Access ---------- */
+function showLogin() {
+  code = ''; role = ''; $('#top').hidden = true; updateNav();
+  card.className = 'card bare';
+  card.innerHTML = `
+    <div class="hero"><img class="logo" src="logo.png" alt="RCCG logo" width="132" height="132">
+      <h1 class="org">${esc(CHURCH)}</h1><div class="org2">${esc(SUB)}</div><div class="eyebrow">Member Registry</div></div>
+    <div class="panel">
+      <label for="code">Access code</label>
+      <input id="code" type="password" autocomplete="off" placeholder="Enter your code">
+      <div class="msg" id="err"></div>
+      <button class="btn block" id="go">Continue</button>
+      ${API_URL ? '' : '<p class="demo">Demo mode. Use <b>welcome</b> or <b>admin</b>.</p>'}
+    </div>
+    <button class="link install">Install this app</button>
+    <p class="verse">“For where two or three are gathered together in my name, there am I in the midst of them.”<b>MATTHEW 18:20</b></p>`;
+  const submit = async () => {
+    const b = $('#go'); b.disabled = true; $('#err').textContent = '';
+    const typed = $('#code').value;
+    try { const r = await run('login', typed); code = typed; role = r.role; await rememberAuth(typed, role); syncBlocked = false; start(); sync(); return; }
+    catch (e) {
+      if (e.offline) {
+        const r = await checkAuth(typed);
+        if (r) { code = typed; role = r; start(); return; }
+        $('#err').textContent = localStorage.getItem('auth') ? 'That access code is not correct.' : 'You are offline. The first sign-in on a phone needs internet.';
+      } else $('#err').textContent = e.message;
+      b.disabled = false;
+    }
+  };
+  $('#go').onclick = submit;
+  $('#code').onkeydown = e => { if (e.key === 'Enter') submit(); };
+  if (matchMedia('(pointer:fine)').matches) $('#code').focus();
+}
+$('#lock').onclick = showLogin;
+
+function start() {
+  $('#top').hidden = false;
+  $('#roleLabel').textContent = role === 'admin' ? 'Admin' : 'Data entry';
+  updateChip(); home();
+}
+
+/* ---------- Shell with tabs (admin only) ---------- */
+function shell(inner, wide) {
+  card.className = 'card' + (wide ? ' wide' : '');
+  card.innerHTML = inner; updateNav(); window.scrollTo(0, 0);
+}
+
+/* ---------- Home, navigation, stats ---------- */
+const ICON = {
+  home: '<svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7M5.5 9.8V20h13V9.8"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  users: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14.4c2.3 0 3.6 1.3 4 4"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 10a4.2 4.2 0 0 1-.5 8.5H7zM12 16.5v-5m-2.5 2.5 2.5-2.5 2.5 2.5"/></svg>'
+};
+function updateNav() {
+  const n = $('#nav'); n.hidden = !role; if (!role) return;
+  const items = [['home', 'Home', ICON.home], ['add', 'Register', ICON.plus]].concat(role === 'admin' ? [['list', 'Members', ICON.users]] : []);
+  n.innerHTML = items.map(([k, l, i]) => `<button data-t="${k}" class="${tab === k ? 'on' : ''}">${i}<span>${l}</span></button>`).join('');
+  n.querySelectorAll('button').forEach(b => b.onclick = () => go(b.dataset.t));
+}
+function go(t) { tab = t; ({ home, add: newForm, list: showList, sync: showPending })[t](); }
+
+function home() {
+  tab = 'home'; card.className = 'card hub'; updateNav(); updateChip();
+  const hr = new Date().getHours(), g = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening', n = getQ().length, on = navigator.onLine;
+  card.innerHTML = `
+    <div class="greet"><small>${role === 'admin' ? 'Administrator' : 'Data entry'}</small><h1>${g}</h1><p>Welcome to the ${esc(CHURCH)} ${esc(SUB)} family registry.</p></div>
+    <button class="hero-tile" id="tAdd"><div><b>Register a member</b><span>Add someone new to the family in about a minute</span></div><i>${ICON.plus}</i></button>
+    <div class="stats" id="stats" hidden></div>
+    <div class="tiles">
+      ${role === 'admin' ? `<button class="tile" id="tList"><i class="ic navy">${ICON.users}</i><b>Members</b><span>Search the registry</span></button>` : ''}
+      <button class="tile" id="tSync"><i class="ic ${n ? 'red' : 'green'}">${ICON.cloud}</i><b>${n ? n + ' waiting' : 'All synced'}</b><span>${on ? (n ? 'Tap to review and upload' : 'Everything is saved') : 'Offline. Saving on this phone'}</span></button>
+    </div>
+    <div id="bdays"></div>
+    <button class="link install">Install this app on your phone</button>`;
+  $('#tAdd').onclick = () => go('add'); $('#tSync').onclick = () => go('sync');
+  if ($('#tList')) $('#tList').onclick = () => go('list');
+  if (role === 'admin') loadStats();
+}
+async function loadStats() {
+  let s;
+  try { s = await run('stats', code); try { localStorage.setItem('stats', JSON.stringify(s)); } catch (e) {} }
+  catch (e) { try { s = JSON.parse(localStorage.getItem('stats') || 'null'); } catch (x) {} }
+  const box = $('#stats'); if (!s || !box || tab !== 'home') return;
+  box.hidden = false;
+  box.innerHTML = [['Members', s.total, 'navy'], ['New this month', s.month, 'green'], ['Need follow-up', s.followUp, 'red']].map(([l, v, c]) => `<div class="stat ${c}"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  if (s.birthdays && s.birthdays.length) $('#bdays').innerHTML = `<div class="list"><h3>Birthdays this week</h3>${s.birthdays.map(b => `<div class="li"><span>${esc(b.name)}</span><small>${esc(b.when)}</small></div>`).join('')}</div>`;
+}
+
+/* ---------- Add member: 3 steps ---------- */
+function newForm() {
+  step = 0;
+  data = { clientId: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), capturedAt: Date.now(), gender: '', memberType: 'New member', baptized: '', dateJoined: new Date().toISOString().slice(0, 10) };
+  render();
+}
+
+function chips(name, opts) {
+  return `<div class="chips" data-chip="${name}">${opts.map(o => `<button type="button" class="${data[name]===o?'on':''}">${o}</button>`).join('')}</div>`;
+}
+const field = (id, label, type = 'text', extra = '', opt = false) =>
+  `<div><label for="${id}">${label}${opt ? ' <span>optional</span>' : ''}</label><input id="${id}" type="${type}" value="${esc(data[id])}" ${extra}><div class="msg"></div></div>`;
+
+function render() {
+  const bar = `<div class="bar">${[0,1,2].map(i => `<i class="${i<=step?'on':''}"></i>`).join('')}</div>`;
+  let body = '';
+  if (step === 0) body = `
+    <h1>Who are we adding?</h1><p class="sub">Start with the basics. It takes about a minute.</p>
+    <div class="grid">
+      ${field('firstName', 'First name', 'text', 'autocomplete="off" autofocus')}
+      ${field('lastName', 'Last name', 'text', 'autocomplete="off"')}
+      <div class="full"><label>Gender</label>${chips('gender', ['Female', 'Male'])}<div class="msg" data-m="gender"></div></div>
+      <div class="full">${field('dob', 'Date of birth', 'date', '', true)}</div>
+    </div>`;
+  if (step === 1) body = `
+    <h1>How can we reach them?</h1><p class="sub">A phone number helps the church follow up with care.</p>
+    <div class="grid">
+      <div class="full">${field('phone', 'Phone number', 'tel', 'inputmode="tel" placeholder="+256 7XX XXX XXX"')}</div>
+      <div class="full">${field('email', 'Email', 'email', 'inputmode="email"', true)}</div>
+      <div class="full">${field('address', 'Home area or address', 'text', '', true)}</div>
+      ${field('occupation', 'Occupation', 'text', '', true)}
+      <div><label for="marital">Marital status <span>optional</span></label>
+        <select id="marital">${['', 'Single', 'Married', 'Widowed', 'Divorced'].map(o => `<option ${data.marital===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    </div>`;
+  if (step === 2) body = `
+    <h1>Life in the church</h1><p class="sub">Tell us where they belong.</p>
+    <div class="grid">
+      <div class="full"><label>Membership</label><div class="seg" id="seg">
+        <button type="button" data-v="New member" class="${data.memberType==='New member'?'on':''}"><b>New member</b><small>Just joined. We'll flag for follow-up.</small></button>
+        <button type="button" data-v="Existing member" class="${data.memberType==='Existing member'?'on':''}"><b>Existing member</b><small>Already part of the church.</small></button></div></div>
+      ${field('dateJoined', 'Date joined', 'date')}
+      <div><label>Baptized?</label>${chips('baptized', ['Yes', 'No'])}</div>
+      <div><label for="ministry">Ministry <span>optional</span></label>
+        <select id="ministry"><option value=""></option>${MINISTRIES.map(o => `<option ${data.ministry===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      ${field('group', 'Fellowship group', 'text', '', true)}
+      <div class="full">${field('invitedBy', 'Invited by', 'text', '', true)}</div>
+      <div class="full"><label for="notes">Notes <span>optional</span></label><textarea id="notes">${esc(data.notes)}</textarea></div>
+    </div>`;
+
+  shell(`${bar}<div class="step">${body}
+    <div class="actions">
+      ${step ? '<button class="btn ghost" id="back">Back</button>' : '<span></span>'}
+      <button class="btn" id="next">${step === 2 ? 'Save member' : 'Continue'}</button>
+    </div></div>`);
+
+  card.querySelectorAll('[data-chip]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => {
+    data[g.dataset.chip] = b.textContent; g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  const seg = $('#seg'); if (seg) seg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    data.memberType = b.dataset.v; seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  });
+  if ($('#back')) $('#back').onclick = () => { grab(); step--; render(); };
+  $('#next').onclick = next;
+  card.querySelectorAll('input').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') next(); });
+  const first = card.querySelector('input,select'); if (first && step < 2) first.focus();
+}
+
+function grab() { card.querySelectorAll('input,select,textarea').forEach(el => { if (el.id) data[el.id] = el.value.trim(); }); }
+function flag(id, m) { const el = $('#' + id); if (!el) return; const w = el.parentElement; w.classList.add('bad'); w.querySelector('.msg').textContent = m; el.focus(); }
+
+function validate() {
+  card.querySelectorAll('.bad').forEach(w => { w.classList.remove('bad'); w.querySelector('.msg').textContent = ''; });
+  if (step === 0) {
+    if (!data.firstName) return flag('firstName', 'Enter a first name.'), false;
+    if (!data.lastName) return flag('lastName', 'Enter a last name.'), false;
+    if (!data.gender) { card.querySelector('[data-m=gender]').textContent = 'Choose one.'; return false; }
+  }
+  if (step === 1) {
+    if (String(data.phone).replace(/\D/g, '').length < 7) return flag('phone', 'Enter a valid phone number.'), false;
+    if (data.email && !/^\S+@\S+\.\S+$/.test(data.email)) return flag('email', 'That email looks incomplete.'), false;
+  }
+  return true;
+}
+
+async function next() {
+  grab(); if (!validate()) return;
+  if (step < 2) { step++; render(); return; }
+  save(false);
+}
+
+async function save(confirmDuplicate) {
+  const b = $('#next'); if (b) { b.disabled = true; b.textContent = 'Saving…'; }
+  try {
+    const r = await run('addMember', code, { ...data, confirmDuplicate });
+    if (r.duplicate) {
+      shell(`<h1>Possible duplicate</h1>
+        <div class="warn"><b>${esc(r.name)}</b> (${esc(r.id)}) is already registered with this phone number.</div>
+        <div class="actions"><button class="btn ghost" id="cancel">Go back</button><button class="btn" id="force">Save anyway</button></div>`);
+      $('#cancel').onclick = () => { step = 1; render(); };
+      $('#force').onclick = () => save(true);
+      return;
+    }
+    shell(`<div class="done"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h1>${esc(r.name)} is registered</h1><div class="idtag">${esc(r.id)}</div>
+      <button class="btn block" id="again">Add another member</button></div>`);
+    $('#again').onclick = newForm; $('#again').focus();
+  } catch (e) {
+    if (e.offline) {
+      enqueue({ ...data, confirmDuplicate });
+      shell(`<div class="done"><div class="tick" style="background:#FFF1D6"><svg viewBox="0 0 24 24" style="stroke:#B7791F;stroke-dasharray:none;stroke-dashoffset:0;animation:none"><circle cx="12" cy="12" r="9" style="fill:none"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1>Saved on this phone</h1><p class="sub">${esc(data.firstName + ' ' + data.lastName)} will upload automatically when you are back online.</p>
+        <button class="btn block" id="again">Add another member</button></div>`);
+      $('#again').onclick = newForm; $('#again').focus(); return;
+    }
+    toast(e.message); if (b) { b.disabled = false; b.textContent = 'Save member'; }
+  }
+}
+
+/* ---------- Offline: sign-in memory, queue, sync ---------- */
+async function sha(s) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('registry:' + s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+async function rememberAuth(c, r) { try { localStorage.setItem('auth', JSON.stringify({ [await sha(c)]: r })); } catch (e) {} }
+async function checkAuth(c) { try { return JSON.parse(localStorage.getItem('auth') || '{}')[await sha(c)] || null; } catch (e) { return null; } }
+
+const getQ = () => { try { return JSON.parse(localStorage.getItem('queue') || '[]'); } catch (e) { return []; } };
+function setQ(q) { try { localStorage.setItem('queue', JSON.stringify(q)); } catch (e) { toast('Phone storage is full. Connect soon to upload.'); } updateChip(); }
+function enqueue(d) { const q = getQ(); q.push({ id: d.clientId, data: d, status: 'pending' }); setQ(q); }
+
+let syncing = false, syncBlocked = false;
+async function sync() {
+  if (syncing || syncBlocked || !code || !navigator.onLine) return;
+  const q = getQ(); if (!q.some(i => i.status === 'pending')) return;
+  syncing = true; let done = 0;
+  try {
+    for (const it of q) {
+      if (it.status !== 'pending') continue;
+      try {
+        const r = await run('addMember', code, it.data);
+        if (r.duplicate) { it.status = 'review'; it.dup = { name: r.name, id: r.id }; } else { it.gone = true; done++; }
+        setQ(q.filter(x => !x.gone));
+      } catch (e) { if (!e.offline) { syncBlocked = true; toast(e.message + ' Sign in again to upload.'); } break; }
+    }
+  } finally { syncing = false; }
+  if (done) toast(done + (done > 1 ? ' members' : ' member') + ' uploaded to the registry');
+  updateChip(); if (tab === 'sync') showPending(); else if (tab === 'home' && done) home();
+}
+
+function updateChip() {
+  const n = getQ().length, off = !navigator.onLine, c = $('#sync');
+  c.hidden = !role || !(n || off);
+  c.textContent = off ? (n ? 'Offline · ' + n + ' waiting' : 'Offline') : n + ' waiting to upload';
+  c.className = 'chip' + (off ? ' off' : '');
+}
+$('#sync').onclick = () => showPending();
+
+function showPending() {
+  tab = 'sync'; const q = getQ();
+  shell(`<h1>Waiting to upload</h1><p class="sub">${navigator.onLine ? 'Saved on this phone, not in the registry yet.' : 'You are offline. These upload automatically when you are back online.'}</p>
+    ${q.length ? q.map(i => `<div class="qrow"><div><b>${esc(i.data.firstName + ' ' + i.data.lastName)}</b><br><small>${i.status === 'review' ? 'Already registered as ' + esc(i.dup.name) + ' (' + esc(i.dup.id) + ')' : 'Waiting for connection'}</small></div>${i.status === 'review' ? `<div class="qb"><button class="link" data-k="${esc(i.id)}" data-a="keep">Save anyway</button><button class="link" data-k="${esc(i.id)}" data-a="drop">Discard</button></div>` : ''}</div>`).join('') : '<div class="empty">Everything is uploaded.</div>'}
+    <div class="actions"><button class="btn ghost" id="back2">Add member</button><button class="btn" id="now">Upload now</button></div>`);
+  card.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
+    let q2 = getQ(); const it = q2.find(x => x.id === b.dataset.k);
+    if (b.dataset.a === 'drop') q2 = q2.filter(x => x !== it); else { it.data.confirmDuplicate = true; it.status = 'pending'; }
+    setQ(q2); showPending(); sync();
+  });
+  $('#back2').onclick = () => { tab = 'add'; newForm(); };
+  $('#now').onclick = () => { syncBlocked = false; sync().then(showPending); };
+}
+
+/* ---------- Members list (admin) ---------- */
+function showList() {
+  shell(`<h1>Members</h1><p class="sub" id="count">Loading…</p>
+    <input id="q" type="search" placeholder="Search by name, phone, ministry or group" autocomplete="off">
+    <div style="margin-top:12px" id="rows"></div>`, true);
+  let t; $('#q').oninput = () => { clearTimeout(t); t = setTimeout(load, 250); };
+  load();
+}
+async function load() {
+  try {
+    const r = await run('listMembers', code, $('#q').value);
+    $('#count').textContent = `${r.total} registered${r.rows.length < r.total ? ` · showing ${r.rows.length}` : ''}`;
+    $('#rows').innerHTML = r.rows.length ? r.rows.map(m => `<div class="qrow"><div><b>${esc(m.name)}</b><br><small>${esc(m.id)} · ${esc(m.phone)}${m.ministry ? ' · ' + esc(m.ministry) : ''}</small></div><div>${m.followUp ? `<span class="pill new">${esc(m.followUp)}</span>` : '<span class="pill">Active</span>'}</div></div>`).join('')
+      : '<div class="empty">No members match that search.</div>';
+  } catch (e) { if (e.offline) $('#count').textContent = 'You are offline. Connect to view members.'; else toast(e.message); }
+}
+
+let ip; addEventListener('beforeinstallprompt', e => { e.preventDefault(); ip = e; });
+document.addEventListener('click', e => { if (e.target.closest('.install')) { if (ip) { ip.prompt(); ip = null; } else toast('iPhone: tap Share, then Add to Home Screen. Computer: use the install icon in the address bar.'); } });
+try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
+addEventListener('online', () => { updateChip(); sync(); if (tab === 'home' && role) home(); });
+addEventListener('offline', () => { updateChip(); if (tab === 'home' && role) home(); });
+setInterval(sync, 30000);
+showLogin();
+</script>
+</body>
+</html>
